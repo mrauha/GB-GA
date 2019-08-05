@@ -216,6 +216,17 @@ def compute_ip(mol, n_confs, path, optmol=True):
 
     return ip
 
+def ip_target(mol, args):
+    n_confs, path, target, sigma, threshold = args
+    try:
+        ip = compute_ip(mol, n_confs, path)
+    except:
+        return None
+
+    score = GaussianModifier(wavelength, target, sigma)
+
+    return score
+
 
 def compute_ea(mol, n_confs, path, optmol=True):
     """
@@ -241,6 +252,18 @@ def compute_ea(mol, n_confs, path, optmol=True):
     shutil.rmtree(dir)
 
     return ea
+
+def ea_target(mol, args):
+    n_confs, path, target, sigma, threshold = args
+    try:
+        ea = compute_ea(mol, n_confs, path)
+    except:
+        return None
+
+    score = GaussianModifier(wavelength, target, sigma)
+
+    return score
+
 
 
 # GuacaMol article https://arxiv.org/abs/1811.09621
