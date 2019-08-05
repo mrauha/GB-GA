@@ -191,6 +191,57 @@ def absorbance_target(mol, args):
 
     return score
 
+def compute_ip(mol, n_confs, path, optmol=True):
+    """
+    Computes the IP using GFN-XTB, see 
+    https://xtb-docs.readthedocs.io/en/latest/sp.html?vertical-ionization-potentials-and-electron-affinities#vertical-ionization-potentials-and-electron-affinities
+    path: path to xtb
+    optmol flag controls if the geometries are optimized at default level of GFN-XTB.
+    Only tested for one conformer
+    """
+    mol = get_structure(mol, n_confs)
+    dir = "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    os.mkdir(dir)
+    os.chdir(dir)
+    write_xtb_input_file(mol, "test")
+    if optimize_molecule:
+        out = shell("{}/xtb test+0.xyz --opt && {}/xtb xtbopt.xyz --vip".format(path, path), shell=False)
+    else:
+        out = shell(path + "/xtb test+0.xyz --vip", shell=False)
+
+ 
+    ip = float(str(out).split("delta SCC IP (eV):")[1].split("\n")[0])
+    os.chdir("..")
+    shutil.rmtree(dir)
+
+    return ip
+
+
+def compute_ea(mol, n_confs, path, optmol=True):
+    """
+    Computes the EA using GFN-XTB, see 
+    https://xtb-docs.readthedocs.io/en/latest/sp.html?vertical-ionization-potentials-and-electron-affinities#vertical-ionization-potentials-and-electron-affinities
+    path: path to xtb
+    optmol flag controls if the geometries are optimized at default level of GFN-XTB.
+    Only tested for one conformer
+    """
+    mol = get_structure(mol, n_confs)
+    dir = "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    os.mkdir(dir)
+    os.chdir(dir)
+    write_xtb_input_file(mol, "test")
+    if optimize_molecule:
+        out = shell("{}/xtb test+0.xyz --opt && {}/xtb xtbopt.xyz --vip".format(path, path), shell=False)
+    else:
+        out = shell(path + "/xtb test+0.xyz --vip", shell=False)
+
+ 
+    ea = float(str(out).split("delta SCC IP (eV):")[1].split("\n")[0])
+    os.chdir("..")
+    shutil.rmtree(dir)
+
+    return ea
+
 
 # GuacaMol article https://arxiv.org/abs/1811.09621
 # adapted from https://github.com/BenevolentAI/guacamol/blob/master/guacamol/utils/fingerprints.py
