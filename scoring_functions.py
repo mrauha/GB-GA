@@ -58,7 +58,6 @@ def calculate_scores(population, function, scoring_args):
     for gene in population:
         score = function(gene, scoring_args)
         scores.append(score)
-
     return scores
 
 
@@ -191,7 +190,7 @@ def absorbance_target(mol, args):
 
     return score
 
-def compute_ip(mol, n_confs, path, optmol=True):
+def compute_ip(mol, n_confs, path, optimize_molecule=False):
     """
     Computes the IP using GFN-XTB, see 
     https://xtb-docs.readthedocs.io/en/latest/sp.html?vertical-ionization-potentials-and-electron-affinities#vertical-ionization-potentials-and-electron-affinities
@@ -200,35 +199,35 @@ def compute_ip(mol, n_confs, path, optmol=True):
     Only tested for one conformer
     """
     mol = get_structure(mol, n_confs)
-    dir = "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    dir = "tempdir" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
     os.mkdir(dir)
     os.chdir(dir)
     write_xtb_input_file(mol, "test")
     if optimize_molecule:
+        # doesn't work, returns "#ERROR! You don't have a file named 'xtbopt.xyz' here"
         out = shell("{}/xtb test+0.xyz --opt && {}/xtb xtbopt.xyz --vip".format(path, path), shell=False)
     else:
-        out = shell(path + "/xtb test+0.xyz --vip", shell=False)
-
- 
-    ip = float(str(out).split("delta SCC IP (eV):")[1].split("\n")[0])
+        out = shell(path + "/xtb test+0.xyz --vip", shell=False)   
+    ip = float(str(out).split("delta SCC IP (eV):")[1].split("\\n")[0])
     os.chdir("..")
     shutil.rmtree(dir)
 
     return ip
 
 def ip_target(mol, args):
-    n_confs, path, target, sigma, threshold = args
+    n_confs, path, target, sigma = args
+    ip = compute_ip(mol, n_confs, path) # for debugging
+
     try:
         ip = compute_ip(mol, n_confs, path)
     except:
         return None
 
-    score = GaussianModifier(wavelength, target, sigma)
+    score = GaussianModifier(ip, target, sigma)
 
     return score
 
-
-def compute_ea(mol, n_confs, path, optmol=True):
+def compute_ea(mol, n_confs, path, optimize_molecule=False):
     """
     Computes the EA using GFN-XTB, see 
     https://xtb-docs.readthedocs.io/en/latest/sp.html?vertical-ionization-potentials-and-electron-affinities#vertical-ionization-potentials-and-electron-affinities
@@ -237,30 +236,31 @@ def compute_ea(mol, n_confs, path, optmol=True):
     Only tested for one conformer
     """
     mol = get_structure(mol, n_confs)
-    dir = "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    dir = "tempdir" + "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
     os.mkdir(dir)
     os.chdir(dir)
     write_xtb_input_file(mol, "test")
     if optimize_molecule:
+        # doesn't work, returns "#ERROR! You don't have a file named 'xtbopt.xyz' here"
         out = shell("{}/xtb test+0.xyz --opt && {}/xtb xtbopt.xyz --vip".format(path, path), shell=False)
     else:
-        out = shell(path + "/xtb test+0.xyz --vip", shell=False)
-
- 
-    ea = float(str(out).split("delta SCC IP (eV):")[1].split("\n")[0])
+        out = shell(path + "/xtb test+0.xyz --vip", shell=False)   
+    ea = float(str(out).split("delta SCC EA (eV):")[1].split("\\n")[0])
     os.chdir("..")
     shutil.rmtree(dir)
 
     return ea
 
 def ea_target(mol, args):
-    n_confs, path, target, sigma, threshold = args
+    n_confs, path, target, sigma = args
+    ea = compute_ea(mol, n_confs, path) # for debugging
+
     try:
-        ea = compute_ea(mol, n_confs, path)
+        ea = compute_ip(mol, n_confs, path)
     except:
         return None
 
-    score = GaussianModifier(wavelength, target, sigma)
+    score = GaussianModifier(ea, target, sigma)
 
     return score
 

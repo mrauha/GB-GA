@@ -6,7 +6,8 @@ usage example: 'python GA_logP.py ZINC_first_1000.smi' or 'python GA_rediscovery
 # Changes by me
 - Ran some .py files through [black](https://black.readthedocs.io/en/stable/) to get rid of the two-space indentations
 - Implement calculators for IP/EA with GFN-XTB, see the [docs](https://xtb-docs.readthedocs.io/en/latest/sp.html?vertical-ionization-potentials-and-electron-affinities#vertical-ionization-potentials-and-electron-affinities)
+- Wrote GA_IPEA.py that implements GA for IP/EA targets
 
 ## TODO
-- Write GA_IPEA.py that implements GA for IP/EA targets
-- Figure out the role of GaussianModifier, ThresholdedLinearModifier, whether to use these.
+- Get GA_IPEA with the optimize_molecule flag to work as well
+- Implement some way to visualize the progress

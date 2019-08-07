@@ -7,14 +7,13 @@ import GB_GA as ga
 import sys
 from multiprocessing import Pool
 
-scoring_function = sc.absorbance_target
-target = 200. # nm
-sigma = 50. # nm
-threshold = 0.3
-n_confs = 20
-xtb_path = '/home/jhjensen/stda'
-scoring_args = [n_confs, xtb_path, target, sigma, threshold]
-max_score = 1.99
+scoring_function = sc.ip_target
+target = 5. # eV
+sigma = 1. # eV
+n_confs = 1
+xtb_path = '/home/markus/Documents/university/phd/code/xtb_6.1/bin/'
+scoring_args = [n_confs, xtb_path, target, sigma]
+max_score = 0.99
 
 population_size = 20 
 mating_pool_size = 20
@@ -30,7 +29,6 @@ file_name = sys.argv[1]
 
 print('target', target)
 print('sigma', sigma)
-print('threshold', threshold)
 print('n_confs', n_confs)
 print('max_score', max_score)
 print('population_size', population_size)
